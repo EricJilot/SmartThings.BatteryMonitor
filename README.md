@@ -1,4 +1,4 @@
-# AverageThings SmartApp for SmartThings
+# BatteryMonitor SmartApp for SmartThings
 ===========
 
 Copyright (c) 2014 [Brandon Gordon](https://github.com/notoriousbdg)
@@ -18,7 +18,7 @@ This SmartApp helps you monitor the status of your SmartThings devices with batt
 
 ##Install Procedure
 
-1. Create new SmartApps at https://graph.api.smartthings.com/ide/apps using the SmartApps at https://github.com/notoriousbdg/SmartThings.BatteryThings.
+1. Create new SmartApps at https://graph.api.smartthings.com/ide/apps using the SmartApps at https://github.com/notoriousbdg/SmartThings.BatteryMonitor.
 2. Install the newly created SmartApp in the SmartThings mobile application.
 3. Follow the prompts to configure.
 4. Tap Status to view battery level for all devices.
@@ -29,4 +29,4 @@ This SmartApp helps you monitor the status of your SmartThings devices with batt
 2014-11-14  v0.0.1  Initial release
 
 The latest version of this file can be found at:
-  https://github.com/notoriousbdg/SmartThings.AverageThings
+  https://github.com/notoriousbdg/SmartThings.BatteryMonitor

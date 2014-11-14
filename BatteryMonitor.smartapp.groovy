@@ -1,5 +1,5 @@
 /**
- *  BatteryThings SmartApp for SmartThings
+ *  BatteryMonitor SmartApp for SmartThings
  *
  *  Copyright (c) 2014 Brandon Gordon (https://github.com/notoriousbdg)
  *
@@ -18,7 +18,7 @@
  *
  *  Install Steps
  *  ----------------
- *  1. Create new SmartApps at https://graph.api.smartthings.com/ide/apps using the SmartApps at https://github.com/notoriousbdg/SmartThings.BatteryThings.
+ *  1. Create new SmartApps at https://graph.api.smartthings.com/ide/apps using the SmartApps at https://github.com/notoriousbdg/SmartThings.BatteryMonitor.
  *  2. Install the newly created SmartApp in the SmartThings mobile application.
  *  3. Follow the prompts to configure.
  *  4. Tap Status to view battery level for all devices.
@@ -28,12 +28,12 @@
  *  2014-11-14  v0.0.1  Initial release
  *
  *  The latest version of this file can be found at:
- *    https://github.com/notoriousbdg/SmartThings.BatteryThings
+ *    https://github.com/notoriousbdg/SmartThings.BatteryMonitor
  *
  */
 
 definition(
-    name: "BatteryThings",
+    name: "BatteryMonitor",
     namespace: "notoriousbdg",
     author: "Brandon Gordon",
     description: "SmartApp to monitor battery levels.",
@@ -52,7 +52,7 @@ preferences {
 def pageMain() {
     def pageProperties = [
         name:       "pageMain",
-        title:      "BatteryThings",
+        title:      "BatteryMonitor",
         nextPage:   null,
         install:    true,
         uninstall:  true
