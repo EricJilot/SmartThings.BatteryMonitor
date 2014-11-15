@@ -88,9 +88,11 @@ def pageStatus() {
             	listLevel1 += "$it.currentBattery  $it.displayName\n"
             } else if (it.currentBattery >= settings.level1.toInteger() && it.currentBattery <= settings.level3.toInteger()) {
             	listLevel2 += "$it.currentBattery  $it.displayName\n"
-            } else if (it.currentBattery >  settings.level3.toInteger()) {
+            } else if (it.currentBattery >  settings.level3.toInteger() && it.currentBattery <= 100) {
             	listLevel3 += "$it.currentBattery  $it.displayName\n"
-            }
+            } else {
+				listLevel0 += "$it.currentBattery  $it.displayName\n"
+			}
         }
 
         if (listLevel0) {
