@@ -90,6 +90,8 @@ def pageStatus() {
             	listLevel2 += "$it.currentBattery  $it.displayName\n"
             } else if (it.currentBattery >  settings.level3.toInteger() && it.currentBattery <= 100) {
             	listLevel3 += "$it.currentBattery  $it.displayName\n"
+            } else if (it.currentBattery == "OK") {
+            	listLevel3 += "$it.currentBattery  $it.displayName\n"
             } else {
 				listLevel0 += "$it.currentBattery  $it.displayName\n"
 			}
