@@ -32,6 +32,7 @@ This SmartApp helps you monitor the status of your SmartThings devices with batt
                     Improved formatting of status page
                     Added low, medium, high thresholds
 					Handle battery status strings of OK and Low
+2014-11-15  v0.0.3  Added push notifications
 
 The latest version of this file can be found at:
   https://github.com/notoriousbdg/SmartThings.BatteryMonitor

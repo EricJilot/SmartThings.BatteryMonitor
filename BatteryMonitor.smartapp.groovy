@@ -31,6 +31,7 @@
  *                      Improved formatting of status page
  *                      Added low, medium, high thresholds
  *                      Handle battery status strings of OK and Low
+ *  2014-11-15  v0.0.3  Added push notifications
  *
  *  The latest version of this file can be found at:
  *    https://github.com/notoriousbdg/SmartThings.BatteryMonitor
@@ -74,6 +75,7 @@ def pageStatus() {
 
 	if (settings.level1 == null) { settings.level1 = 33 }
 	if (settings.level3 == null) { settings.level3 = 67 }
+	if (settings.pushMessage) { settings.pushMessage = true }
     
 	return dynamicPage(pageProperties) {
 		settings.devices.each() {
@@ -169,15 +171,39 @@ def pageConfigure() {
         uninstall:      true
     ]
 
-    return dynamicPage(pageProperties) {
+    def inputPush      = [
+        name:           "pushMessage",
+        type:           "bool",
+        title:          "Send Push notifications",
+        defaultValue:   true
+    ]
+
+    def inputSMS       = [
+        name:           "phoneNumber",
+        type:           "phone",
+        title:          "Send SMS notification",
+        required:       false
+    ]
+
+	return dynamicPage(pageProperties) {
         section("About") {
             paragraph helpPage
         }
-        section("Devices") {
+
+		section("Devices") {
             input inputBattery
+        }
+        
+        section("Settings") {
             input inputLevel1
             input inputLevel3
         }
+        
+        section("Notification") {
+			input inputPush
+			input inputSMS
+		}
+
         section([title:"Options", mobileOnly:true]) {
             label title:"Assign a name", required:false
         }
@@ -189,16 +215,52 @@ def installed() {
 }
 
 def updated() {
+    unschedule()
     unsubscribe()
     initialize()
 }
 
 def initialize() {
     subscribe(devices, "battery", batteryHandler)
+	state.lowBattNoticeSent = [:]
+
+	runIn(60, updateBatteryStatus)
+}
+
+def send(msg) {
+    log.debug msg
+
+	if (settings.pushMessage) {
+        sendPush(msg)
+    } else {
+        sendNotificationEvent(msg)
+    }
+
+    if (settings.phoneNumber != null) {
+    	sendSms(phoneNumber, msg) 
+    }
+}
+
+def updateBatteryStatus() {
+    settings.devices.each() {
+    	if (it.currentBattery < settings.level1 || it.currentBattery == null || it.currentBattery == "Low") {
+        	if (!state.lowBattNoticeSent.containsKey(it.id)) {
+            	if (it.currentBattery == null) {
+                	send("${it.displayName} battery is not reporting.")
+                } else {
+                	send("${it.displayName} battery is ${it.currentBattery} (threshold ${settings.level1}.)")
+                }
+        	}
+	        state.lowBattNoticeSent[(it.id)] = true            	
+		} else {
+        	if (state.lowBattNoticeSent.containsKey(it.id)) {
+            	state.lowBattNoticeSent.remove(it.id)
+            }
+        }
+    }
 }
 
 def batteryHandler(evt) {
-    for (device in settings.devices) {
-        log.debug "$device.name battery level is $device.currentBattery"
-    }
+	updateBatteryStatus()
 }
+
