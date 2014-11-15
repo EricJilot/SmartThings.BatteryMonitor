@@ -26,6 +26,10 @@
  *  Revision History
  *  ----------------
  *  2014-11-14  v0.0.1  Initial release
+ *  2014-11-15  v0.0.2  Moved status to main page
+ *                      Removed status page
+ *                      Improved formatting of status page
+ *                      Added low, medium, high thresholds
  *
  *  The latest version of this file can be found at:
  *    https://github.com/notoriousbdg/SmartThings.BatteryMonitor
@@ -43,16 +47,15 @@ definition(
 
 
 preferences {
-    page name:"pageMain"
-    page name:"pageConfigure"
     page name:"pageStatus"
+    page name:"pageConfigure"
 }
 
-// Show Main page
-def pageMain() {
+// Show Status page
+def pageStatus() {
     def pageProperties = [
-        name:       "pageMain",
-        title:      "BatteryMonitor",
+        name:       "pageStatus",
+        title:      "BatteryMonitor Status",
         nextPage:   null,
         install:    true,
         uninstall:  true
@@ -62,13 +65,65 @@ def pageMain() {
         return pageConfigure()
     }
     
-    return dynamicPage(pageProperties) {
-        section("Main Menu") {
-            href "pageConfigure", title:"Configure", description:"Tap to open"
-            href "pageStatus", title:"Status", description:"Tap to open"
+	def helpLevel0 = "Batteries with errors or no status."
+    def helpLevel1 = "Batteries with low charge (less than $settings.level1)."
+    def helpLevel2 = "Batteries with medium charge (between $settings.level1 and $settings.level3)."
+    def helpLevel3 = "Batteries with high charge (more than $settings.level3)."
+	def listLevel0 = ""
+    def listLevel1 = ""
+    def listLevel2 = ""
+    def listLevel3 = ""
+
+	if (settings.level1 == null) { settings.level1 = 33 }
+	if (settings.level3 == null) { settings.level3 = 67 }
+    
+	return dynamicPage(pageProperties) {
+		settings.devices.each() {
+            def status = "$it.currentBattery"
+
+
+			if (it.currentBattery == null) {
+            	listLevel0 += "$it.displayName\n"
+            } else if (it.currentBattery <  settings.level1.toInteger()) {
+            	listLevel1 += "$it.currentBattery  $it.displayName\n"
+            } else if (it.currentBattery >= settings.level1.toInteger() && it.currentBattery <= settings.level3.toInteger()) {
+            	listLevel2 += "$it.currentBattery  $it.displayName\n"
+            } else if (it.currentBattery >  settings.level3.toInteger()) {
+            	listLevel3 += "$it.currentBattery  $it.displayName\n"
+            }
         }
-        section([title:"Options", mobileOnly:true]) {
-            label title:"Assign a name", required:false
+
+        if (listLevel0) {
+            section("Battery Error") {
+                paragraph helpLevel0
+                paragraph listLevel0
+            }
+		}
+        
+        if (listLevel1) {
+        	section("Battery Low") {
+            	paragraph helpLevel1
+            	paragraph listLevel1
+            }
+        }
+
+        if (listLevel2) {
+            section("Battery Medium") {
+                paragraph helpLevel2
+                paragraph listLevel2
+            }
+        }
+
+        if (listLevel3) {
+            section("Battery High") {
+                paragraph helpLevel3
+                paragraph listLevel3
+            }
+        }
+
+        section("Menu") {
+            href "pageStatus", title:"Refresh", description:"Tap to refresh"
+            href "pageConfigure", title:"Configure", description:"Tap to open"
         }
     }
 }
@@ -79,18 +134,34 @@ def pageConfigure() {
         "Select devices with batteries that you wish to monitor."
 
     def inputBattery = [
-        name:       "devices",
-        type:       "capability.battery",
-        title:      "Which devices with batteries?",
-        multiple:   true,
-        required:   true
+        name:           "devices",
+        type:           "capability.battery",
+        title:          "Which devices with batteries?",
+        multiple:       true,
+        required:       true
+    ]
+
+    def inputLevel1 = [
+        name:           "level1",
+        type:           "number",
+        title:          "Low battery threshold?",
+        defaultValue:   "33",
+        required:       true
+    ]
+
+	def inputLevel3 = [
+        name:           "level3",
+        type:           "number",
+        title:          "Low battery threshold?",
+        defaultValue:   "67",
+        required:       true
     ]
 
     def pageProperties = [
-        name:       "pageConfigure",
-        title:      "Configure",
-        nextPage:   "pageMain",
-        uninstall:  true
+        name:           "pageConfigure",
+        title:          "BatteryMonitor Configuration",
+        nextPage:       "pageStatus",
+        uninstall:      true
     ]
 
     return dynamicPage(pageProperties) {
@@ -99,30 +170,11 @@ def pageConfigure() {
         }
         section("Devices") {
             input inputBattery
+            input inputLevel1
+            input inputLevel3
         }
-    }
-}
-
-// Show Battery Status Page
-def pageStatus() {
-    def pageProperties = [
-        name:       "pageStatus",
-        title:      "Battery Status",
-        nextPage:   "pageMain",
-        uninstall:  false
-    ]
-
-    return dynamicPage(pageProperties) {
-        settings.devices.each() {
-            def status = "$it.currentBattery"
-
-            section(it.displayName) {
-                paragraph status
-            }
-        }
-        section("Options") {
-            href "pageStatus", title:"Refresh", description:"Tap to refresh"
-            href "pageConfigure", title:"Configure", description:"Tap to open"
+        section([title:"Options", mobileOnly:true]) {
+            label title:"Assign a name", required:false
         }
     }
 }

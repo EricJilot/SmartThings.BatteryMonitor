@@ -27,6 +27,10 @@ This SmartApp helps you monitor the status of your SmartThings devices with batt
 ##Revision History
 
 2014-11-14  v0.0.1  Initial release
+2014-11-15  v0.0.2  Moved status to main page
+                    Removed status page
+                    Improved formatting of status page
+                    Added low, medium, high thresholds
 
 The latest version of this file can be found at:
   https://github.com/notoriousbdg/SmartThings.BatteryMonitor
