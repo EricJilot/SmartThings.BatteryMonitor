@@ -79,9 +79,6 @@ def pageStatus() {
     
 	return dynamicPage(pageProperties) {
 		settings.devices.each() {
-            def status = "$it.currentBattery"
-
-
 			if (it.currentBattery == null) {
             	listLevel0 += "$it.displayName\n"
             } else if (it.currentBattery <  settings.level1.toInteger()) {
@@ -92,6 +89,8 @@ def pageStatus() {
             	listLevel3 += "$it.currentBattery  $it.displayName\n"
             } else if (it.currentBattery == "OK") {
             	listLevel3 += "$it.currentBattery  $it.displayName\n"
+            } else if (it.currentBattery == "Low") {
+            	listLevel1 += "$it.currentBattery  $it.displayName\n"
             } else {
 				listLevel0 += "$it.currentBattery  $it.displayName\n"
 			}
@@ -156,7 +155,7 @@ def pageConfigure() {
 	def inputLevel3 = [
         name:           "level3",
         type:           "number",
-        title:          "Low battery threshold?",
+        title:          "Medium battery threshold?",
         defaultValue:   "67",
         required:       true
     ]
