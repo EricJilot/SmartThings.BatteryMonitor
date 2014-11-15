@@ -30,6 +30,7 @@
  *                      Removed status page
  *                      Improved formatting of status page
  *                      Added low, medium, high thresholds
+ *                      Handle battery status strings of OK and Low
  *
  *  The latest version of this file can be found at:
  *    https://github.com/notoriousbdg/SmartThings.BatteryMonitor
@@ -65,14 +66,11 @@ def pageStatus() {
         return pageConfigure()
     }
     
-	def helpLevel0 = "Batteries with errors or no status."
-    def helpLevel1 = "Batteries with low charge (less than $settings.level1)."
-    def helpLevel2 = "Batteries with medium charge (between $settings.level1 and $settings.level3)."
-    def helpLevel3 = "Batteries with high charge (more than $settings.level3)."
 	def listLevel0 = ""
     def listLevel1 = ""
     def listLevel2 = ""
     def listLevel3 = ""
+    def listLevel4 = ""
 
 	if (settings.level1 == null) { settings.level1 = 33 }
 	if (settings.level3 == null) { settings.level3 = 67 }
@@ -85,8 +83,10 @@ def pageStatus() {
             	listLevel1 += "$it.currentBattery  $it.displayName\n"
             } else if (it.currentBattery >= settings.level1.toInteger() && it.currentBattery <= settings.level3.toInteger()) {
             	listLevel2 += "$it.currentBattery  $it.displayName\n"
-            } else if (it.currentBattery >  settings.level3.toInteger() && it.currentBattery <= 100) {
+            } else if (it.currentBattery >  settings.level3.toInteger() && it.currentBattery < 100) {
             	listLevel3 += "$it.currentBattery  $it.displayName\n"
+            } else if (it.currentBattery == 100) {
+            	listLevel4 += "$it.displayName\n"
             } else if (it.currentBattery == "OK") {
             	listLevel3 += "$it.currentBattery  $it.displayName\n"
             } else if (it.currentBattery == "Low") {
@@ -97,30 +97,32 @@ def pageStatus() {
         }
 
         if (listLevel0) {
-            section("Battery Error") {
-                paragraph helpLevel0
-                paragraph listLevel0
+            section("Batteries with errors or no status") {
+                paragraph listLevel0.trim()
             }
 		}
         
         if (listLevel1) {
-        	section("Battery Low") {
-            	paragraph helpLevel1
-            	paragraph listLevel1
+        	section("Batteries with low charge (less than $settings.level1)") {
+            	paragraph listLevel1.trim()
             }
         }
 
         if (listLevel2) {
-            section("Battery Medium") {
-                paragraph helpLevel2
-                paragraph listLevel2
+            section("Batteries with medium charge (between $settings.level1 and $settings.level3)") {
+                paragraph listLevel2.trim()
             }
         }
 
         if (listLevel3) {
-            section("Battery High") {
-                paragraph helpLevel3
-                paragraph listLevel3
+            section("Batteries with high charge (more than $settings.level3)") {
+                paragraph listLevel3.trim()
+            }
+        }
+
+        if (listLevel4) {
+            section("Batteries with full charge") {
+                paragraph listLevel4.trim()
             }
         }
 
