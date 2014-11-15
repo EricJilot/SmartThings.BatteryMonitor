@@ -82,7 +82,7 @@ def pageStatus() {
 			if (it.currentBattery == null) {
             	listLevel0 += "$it.displayName\n"
             } else if (it.currentBattery.isNumber()) {
-				if (it.currentBattery <  settings.level1.toInteger()) {
+				if (it.currentBattery >= 0 && it.currentBattery <  settings.level1.toInteger()) {
 					listLevel1 += "$it.currentBattery  $it.displayName\n"
 				} else if (it.currentBattery >= settings.level1.toInteger() && it.currentBattery <= settings.level3.toInteger()) {
 					listLevel2 += "$it.currentBattery  $it.displayName\n"
@@ -90,7 +90,9 @@ def pageStatus() {
 					listLevel3 += "$it.currentBattery  $it.displayName\n"
 				} else if (it.currentBattery == 100) {
 					listLevel4 += "$it.displayName\n"
-                }
+                } else {
+				    listLevel0 += "$it.currentBattery  $it.displayName\n"
+		    	}
 			} else if (it.currentBattery == "OK") {
             	listLevel3 += "$it.currentBattery  $it.displayName\n"
             } else if (it.currentBattery == "Low") {
