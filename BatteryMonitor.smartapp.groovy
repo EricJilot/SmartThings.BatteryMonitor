@@ -32,6 +32,7 @@
  *                      Added low, medium, high thresholds
  *                      Handle battery status strings of OK and Low
  *  2014-11-15  v0.0.3  Added push notifications
+ *  2014-11-20  v0.0.4  Added error handling for batteries that return strings
  *
  *  The latest version of this file can be found at:
  *    https://github.com/notoriousbdg/SmartThings.BatteryMonitor
@@ -79,27 +80,25 @@ def pageStatus() {
     
 	return dynamicPage(pageProperties) {
 		settings.devices.each() {
-			if (it.currentBattery == null) {
-            	listLevel0 += "$it.displayName\n"
-            } else if (it.currentBattery.isNumber()) {
-				if (it.currentBattery >= 0 && it.currentBattery <  settings.level1.toInteger()) {
-					listLevel1 += "$it.currentBattery  $it.displayName\n"
-				} else if (it.currentBattery >= settings.level1.toInteger() && it.currentBattery <= settings.level3.toInteger()) {
-					listLevel2 += "$it.currentBattery  $it.displayName\n"
-				} else if (it.currentBattery >  settings.level3.toInteger() && it.currentBattery < 100) {
-					listLevel3 += "$it.currentBattery  $it.displayName\n"
-				} else if (it.currentBattery == 100) {
-					listLevel4 += "$it.displayName\n"
+			try {
+                if (it.currentBattery == null) {
+                    listLevel0 += "$it.displayName\n"
+                } else if (it.currentBattery >= 0 && it.currentBattery <  settings.level1.toInteger()) {
+                    listLevel1 += "$it.currentBattery  $it.displayName\n"
+                } else if (it.currentBattery >= settings.level1.toInteger() && it.currentBattery <= settings.level3.toInteger()) {
+                    listLevel2 += "$it.currentBattery  $it.displayName\n"
+                } else if (it.currentBattery >  settings.level3.toInteger() && it.currentBattery < 100) {
+                    listLevel3 += "$it.currentBattery  $it.displayName\n"
+                } else if (it.currentBattery == 100) {
+                    listLevel4 += "$it.displayName\n"
                 } else {
-				    listLevel0 += "$it.currentBattery  $it.displayName\n"
-		    	}
-			} else if (it.currentBattery == "OK") {
-            	listLevel3 += "$it.currentBattery  $it.displayName\n"
-            } else if (it.currentBattery == "Low") {
-            	listLevel1 += "$it.currentBattery  $it.displayName\n"
-            } else {
-				listLevel0 += "$it.currentBattery  $it.displayName\n"
-			}
+                    listLevel0 += "$it.currentBattery  $it.displayName\n"
+                }
+            } catch (e) {
+            	log.trace "Caught error checking battery status."
+                log.trace e
+                listLevel0 += "$it.displayName\n"
+            }
         }
 
         if (listLevel0) {
@@ -247,22 +246,38 @@ def send(msg) {
 
 def updateBatteryStatus() {
     settings.devices.each() {
-    	if (it.currentBattery < settings.level1 || it.currentBattery == null || it.currentBattery == "Low") {
-        	if (!state.lowBattNoticeSent.containsKey(it.id)) {
-            	if (it.currentBattery == null) {
-                	send("${it.displayName} battery is not reporting.")
-                } else {
-                	send("${it.displayName} battery is ${it.currentBattery} (threshold ${settings.level1}.)")
+        try {
+            if (it.currentBattery == null) {
+                if (!state.lowBattNoticeSent.containsKey(it.id)) {
+                    send("${it.displayName} battery is not reporting.")
+                    state.lowBattNoticeSent[(it.id)] = true
                 }
-        	}
-	        state.lowBattNoticeSent[(it.id)] = true            	
-		} else {
-        	if (state.lowBattNoticeSent.containsKey(it.id)) {
-            	state.lowBattNoticeSent.remove(it.id)
+            } else if (it.currentBattery > 100) {
+                if (!state.lowBattNoticeSent.containsKey(it.id)) {
+                    send("${it.displayName} battery is ${it.currentBattery}, which is over 100.")
+                    state.lowBattNoticeSent[(it.id)] = true
+                }
+            } else if (it.currentBattery < settings.level1) {
+                if (!state.lowBattNoticeSent.containsKey(it.id)) {
+                    send("${it.displayName} battery is ${it.currentBattery} (threshold ${settings.level1}.)")
+                    state.lowBattNoticeSent[(it.id)] = true
+                }
+            } else {
+                if (state.lowBattNoticeSent.containsKey(it.id)) {
+                    state.lowBattNoticeSent.remove(it.id)
+                }
+            }
+        } catch (e) {
+            log.trace "Caught error checking battery status."
+            log.trace e
+            if (!state.lowBattNoticeSent.containsKey(it.id)) {
+                    send("${it.displayName} battery reported a non-integer level.")
+                    state.lowBattNoticeSent[(it.id)] = true
             }
         }
     }
 }
+
 
 def batteryHandler(evt) {
 	updateBatteryStatus()
