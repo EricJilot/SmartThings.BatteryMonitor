@@ -18,7 +18,7 @@ This SmartApp helps you monitor the status of your SmartThings devices with batt
 
 ##Install Procedure
 
-1. Create new SmartApps at https://graph.api.smartthings.com/ide/apps using the SmartApps at https://github.com/notoriousbdg/SmartThings.BatteryMonitor.
+1. Create new SmartApp at https://graph.api.smartthings.com/ide/apps.
 2. Install the newly created SmartApp in the SmartThings mobile application.
 3. Follow the prompts to configure.
 4. Tap Status to view battery level for all devices.
@@ -26,14 +26,25 @@ This SmartApp helps you monitor the status of your SmartThings devices with batt
 
 ##Revision History
 
-2014-11-14  v0.0.1  Initial release
-2014-11-15  v0.0.2  Moved status to main page
-                    Removed status page
-                    Improved formatting of status page
-                    Added low, medium, high thresholds
-					Handle battery status strings of OK and Low
-2014-11-15  v0.0.3  Added push notifications
-2014-11-20  v0.0.4  Added error handling for batteries that return strings
+2014-11-14  v0.0.1
+* Initial release
+
+2014-11-15  v0.0.2
+* Moved status to main page
+* Removed status page
+* Improved formatting of status page
+* Added low, medium, high thresholds
+* Handle battery status strings of OK and Low
+
+2014-11-15  v0.0.3
+* Added push notifications
+
+2014-11-20  v0.0.4
+* Added error handling for batteries that return strings
+
+2014-12-26  v0.0.5
+* Move app metadata to a new about page
+* Changed notifications to only send at specified time daily
 
 The latest version of this file can be found at:
   https://github.com/notoriousbdg/SmartThings.BatteryMonitor

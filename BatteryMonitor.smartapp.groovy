@@ -1,43 +1,62 @@
-/**
- *  BatteryMonitor SmartApp for SmartThings
- *
- *  Copyright (c) 2014 Brandon Gordon (https://github.com/notoriousbdg)
- *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License. You may obtain a copy of the License at:
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
- *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
- *  for the specific language governing permissions and limitations under the License.
- *
- *  Overview
- *  ----------------
- *  This SmartApp helps you monitor the status of your SmartThings devices with batteries.
- *
- *  Install Steps
- *  ----------------
- *  1. Create new SmartApps at https://graph.api.smartthings.com/ide/apps using the SmartApps at https://github.com/notoriousbdg/SmartThings.BatteryMonitor.
- *  2. Install the newly created SmartApp in the SmartThings mobile application.
- *  3. Follow the prompts to configure.
- *  4. Tap Status to view battery level for all devices.
- *
- *  Revision History
- *  ----------------
- *  2014-11-14  v0.0.1  Initial release
- *  2014-11-15  v0.0.2  Moved status to main page
- *                      Removed status page
- *                      Improved formatting of status page
- *                      Added low, medium, high thresholds
- *                      Handle battery status strings of OK and Low
- *  2014-11-15  v0.0.3  Added push notifications
- *  2014-11-20  v0.0.4  Added error handling for batteries that return strings
- *
- *  The latest version of this file can be found at:
- *    https://github.com/notoriousbdg/SmartThings.BatteryMonitor
- *
- */
+def smartAppNameFull() {
+    return  "BatteryMonitor SmartApp for SmartThings"
+}
+
+def smartAppNameShort() {
+    return  "BatteryMonitor"
+}
+
+def smartAppVersion() {
+    return  "Version 0.0.5"
+}
+
+def smartAppAuthor() {
+    return  "Author Brandon Gordon"
+}
+
+def smartAppCopyright() {
+    return  "Copyright (c) 2014 Brandon Gordon"
+}
+
+def smartAppSource() {
+    return  "https://github.com/notoriousbdg/SmartThings.BatteryMonitor"
+}
+
+def smartAppDescription() {
+    return  "This SmartApp helps you monitor the status of your SmartThings devices with batteries."
+}
+
+def smartAppRevision () {
+    return  '2014-11-14  v0.0.1\n' +
+            ' * Initial release\n\n' +
+            '2014-11-15  v0.0.2\n' +
+            ' * Moved status to main page\n' +
+            ' * Removed status page\n' +
+            ' * Improved formatting of status page\n' +
+            ' * Added low, medium, high thresholds\n' +
+            ' * Handle battery status strings of OK and Low\n\n' +
+            '2014-11-15  v0.0.3\n' +
+            ' * Added push notifications\n\n' +
+            '2014-11-20  v0.0.4\n' +
+            ' * Added error handling for batteries that return strings\n\n' +
+            '2014-12-26  v0.0.5\n' +
+            ' * Move app metadata to a new about page\n' +
+            ' * Changed notifications to only send at specified time daily\n'
+}
+
+def smartAppLicense() {
+    return  'Licensed under the Apache License, Version 2.0 (the "License"); you ' +
+            'may not use this file except in compliance with the License. You ' +
+            'may obtain a copy of the License at:' +
+            '\n\n' +
+            'http://www.apache.org/licenses/LICENSE-2.0' +
+            '\n\n' +
+            'Unless required by applicable law or agreed to in writing, software ' +
+            'distributed under the License is distributed on an "AS IS" BASIS, ' +
+            'WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or ' +
+            'implied. See the License for the specific language governing ' +
+            'permissions and limitations under the License.'
+}
 
 definition(
     name: "BatteryMonitor",
@@ -48,39 +67,83 @@ definition(
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
 
-
 preferences {
     page name:"pageStatus"
     page name:"pageConfigure"
+    page name:"pageAbout"
+}
+
+// Show About Page
+def pageAbout() {
+    def pageProperties = [
+        name:           "pageAbout",
+        title:          smartAppNameFull(),
+        nextPage:       "pageConfigure",
+        uninstall:      true
+    ]
+
+    return dynamicPage(pageProperties) {
+        section() {
+            paragraph smartAppVersion() + "\n" +
+                      smartAppAuthor() + "\n" +
+                      smartAppCopyright()
+        }
+        
+        section() {
+            paragraph smartAppDescription()
+        }
+        
+        section() {
+            href(
+                name: "sourceCode",
+                title: "Source Code (Tap to view)",
+                required: false,
+                external: true,
+                style: "external",
+                url: smartAppSource(),
+                description: smartAppSource()
+            )
+        }
+
+        section() {
+            paragraph title: "Revision History",
+                      smartAppRevision()
+        }
+        
+        section() {
+            paragraph title: "License",
+                      smartAppLicense()
+        }  
+    }
 }
 
 // Show Status page
 def pageStatus() {
     def pageProperties = [
         name:       "pageStatus",
-        title:      "BatteryMonitor Status",
+        title:      smartAppNameShort() + " Status",
         nextPage:   null,
         install:    true,
         uninstall:  true
     ]
 
     if (settings.devices == null) {
-        return pageConfigure()
+        return pageAbout()
     }
     
-	def listLevel0 = ""
+    def listLevel0 = ""
     def listLevel1 = ""
     def listLevel2 = ""
     def listLevel3 = ""
     def listLevel4 = ""
 
-	if (settings.level1 == null) { settings.level1 = 33 }
-	if (settings.level3 == null) { settings.level3 = 67 }
-	if (settings.pushMessage) { settings.pushMessage = true }
+    if (settings.level1 == null) { settings.level1 = 33 }
+    if (settings.level3 == null) { settings.level3 = 67 }
+    if (settings.pushMessage) { settings.pushMessage = true }
     
-	return dynamicPage(pageProperties) {
-		settings.devices.each() {
-			try {
+    return dynamicPage(pageProperties) {
+        settings.devices.each() {
+            try {
                 if (it.currentBattery == null) {
                     listLevel0 += "$it.displayName\n"
                 } else if (it.currentBattery >= 0 && it.currentBattery <  settings.level1.toInteger()) {
@@ -95,7 +158,7 @@ def pageStatus() {
                     listLevel0 += "$it.currentBattery  $it.displayName\n"
                 }
             } catch (e) {
-            	log.trace "Caught error checking battery status."
+                log.trace "Caught error checking battery status."
                 log.trace e
                 listLevel0 += "$it.displayName\n"
             }
@@ -105,11 +168,11 @@ def pageStatus() {
             section("Batteries with errors or no status") {
                 paragraph listLevel0.trim()
             }
-		}
+        }
         
         if (listLevel1) {
-        	section("Batteries with low charge (less than $settings.level1)") {
-            	paragraph listLevel1.trim()
+            section("Batteries with low charge (less than $settings.level1)") {
+                paragraph listLevel1.trim()
             }
         }
 
@@ -132,8 +195,9 @@ def pageStatus() {
         }
 
         section("Menu") {
-            href "pageStatus", title:"Refresh", description:"Tap to refresh"
-            href "pageConfigure", title:"Configure", description:"Tap to open"
+            href "pageStatus", title:"Refresh", description:""
+            href "pageConfigure", title:"Configure", description:""
+            href "pageAbout", title:"About", description: ""
         }
     }
 }
@@ -143,7 +207,7 @@ def pageConfigure() {
     def helpPage =
         "Select devices with batteries that you wish to monitor."
 
-    def inputBattery = [
+    def inputBattery   = [
         name:           "devices",
         type:           "capability.battery",
         title:          "Which devices with batteries?",
@@ -151,49 +215,56 @@ def pageConfigure() {
         required:       true
     ]
 
-    def inputLevel1 = [
+    def inputLevel1    = [
         name:           "level1",
         type:           "number",
         title:          "Low battery threshold?",
-        defaultValue:   "33",
+        defaultValue:   "20",
         required:       true
     ]
 
-	def inputLevel3 = [
+    def inputLevel3    = [
         name:           "level3",
         type:           "number",
         title:          "Medium battery threshold?",
-        defaultValue:   "67",
+        defaultValue:   "70",
         required:       true
     ]
 
-    def pageProperties = [
-        name:           "pageConfigure",
-        title:          "BatteryMonitor Configuration",
-        nextPage:       "pageStatus",
-        uninstall:      true
+    def inputTime      = [
+        name:           "time",
+        type:           "time",
+        title:          "Notify at what time daily?",
+        required:       true
     ]
 
     def inputPush      = [
         name:           "pushMessage",
         type:           "bool",
-        title:          "Send Push notifications",
+        title:          "Send push notifications?",
         defaultValue:   true
     ]
 
     def inputSMS       = [
         name:           "phoneNumber",
         type:           "phone",
-        title:          "Send SMS notification",
+        title:          "Send SMS notifications to?",
         required:       false
     ]
 
-	return dynamicPage(pageProperties) {
+    def pageProperties = [
+        name:           "pageConfigure",
+        title:          smartAppNameShort() + " Configuration",
+        nextPage:       "pageStatus",
+        uninstall:      true
+    ]
+
+    return dynamicPage(pageProperties) {
         section("About") {
             paragraph helpPage
         }
 
-		section("Devices") {
+        section("Devices") {
             input inputBattery
         }
         
@@ -203,9 +274,10 @@ def pageConfigure() {
         }
         
         section("Notification") {
-			input inputPush
-			input inputSMS
-		}
+            input inputTime
+            input inputPush
+            input inputSMS
+        }
 
         section([title:"Options", mobileOnly:true]) {
             label title:"Assign a name", required:false
@@ -214,6 +286,8 @@ def pageConfigure() {
 }
 
 def installed() {
+    log.debug "Initialized with settings: ${settings}"
+
     initialize()
 }
 
@@ -224,61 +298,37 @@ def updated() {
 }
 
 def initialize() {
-    subscribe(devices, "battery", batteryHandler)
-	state.lowBattNoticeSent = [:]
-
-	runIn(60, updateBatteryStatus)
+    schedule(settings.time, updateStatus)
 }
 
 def send(msg) {
     log.debug msg
 
-	if (settings.pushMessage) {
+    if (settings.pushMessage) {
         sendPush(msg)
     } else {
         sendNotificationEvent(msg)
     }
 
     if (settings.phoneNumber != null) {
-    	sendSms(phoneNumber, msg) 
+        sendSms(phoneNumber, msg) 
     }
 }
 
-def updateBatteryStatus() {
+def updateStatus() {
     settings.devices.each() {
         try {
             if (it.currentBattery == null) {
-                if (!state.lowBattNoticeSent.containsKey(it.id)) {
-                    send("${it.displayName} battery is not reporting.")
-                    state.lowBattNoticeSent[(it.id)] = true
-                }
+                send("${it.displayName} battery is not reporting.")
             } else if (it.currentBattery > 100) {
-                if (!state.lowBattNoticeSent.containsKey(it.id)) {
-                    send("${it.displayName} battery is ${it.currentBattery}, which is over 100.")
-                    state.lowBattNoticeSent[(it.id)] = true
-                }
+                send("${it.displayName} battery is ${it.currentBattery}, which is over 100.")
             } else if (it.currentBattery < settings.level1) {
-                if (!state.lowBattNoticeSent.containsKey(it.id)) {
-                    send("${it.displayName} battery is ${it.currentBattery} (threshold ${settings.level1}.)")
-                    state.lowBattNoticeSent[(it.id)] = true
-                }
-            } else {
-                if (state.lowBattNoticeSent.containsKey(it.id)) {
-                    state.lowBattNoticeSent.remove(it.id)
-                }
+                send("${it.displayName} battery is ${it.currentBattery} (threshold ${settings.level1}.)")
             }
         } catch (e) {
             log.trace "Caught error checking battery status."
             log.trace e
-            if (!state.lowBattNoticeSent.containsKey(it.id)) {
-                    send("${it.displayName} battery reported a non-integer level.")
-                    state.lowBattNoticeSent[(it.id)] = true
-            }
+            send("${it.displayName} battery reported a non-integer level.")
         }
     }
-}
-
-
-def batteryHandler(evt) {
-	updateBatteryStatus()
 }
